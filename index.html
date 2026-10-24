@@ -953,6 +953,51 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+        // 1. 自動把第 3 關按鈕改成「播放朗讀」
+document.addEventListener('DOMContentLoaded', () => {
+    const l3Card = document.getElementById('level-3-card');
+    if (l3Card) {
+        // 重寫第 3 關的畫面
+        l3Card.innerHTML = `
+            <h3 class="text-lg font-bold text-cyan-400 mb-2">第三關：語音情報攔截</h3>
+            <p class="text-sm text-slate-300 mb-4">請點擊播放按鈕聆聽特務秘密錄音，並輸入聽到的英文單詞：</p>
+            <div class="mb-6 flex flex-col items-center justify-center p-4 bg-slate-800/60 rounded-xl border border-cyan-500/20">
+                <button onclick="playSpeechHappy()" class="flex items-center gap-2 px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl shadow-lg active:scale-95">
+                    🔊 播放情報錄音
+                </button>
+            </div>
+            <div class="flex gap-2 max-w-md mx-auto">
+                <input type="text" id="l3-happy-input" placeholder="請輸入聽到的英文單词..." class="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-400">
+                <button onclick="checkHappyWord()" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl active:scale-95">驗證</button>
+            </div>
+        `;
+    }
+});
+
+// 2. 朗讀 Happy 語音
+function playSpeechHappy() {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance('Happy');
+        msg.lang = 'en-US';
+        msg.rate = 0.8;
+        window.speechSynthesis.speak(msg);
+    } else {
+        alert("手機瀏覽器不支援語音朗讀");
+    }
+}
+
+// 3. 驗證答案是否為 happy
+function checkHappyWord() {
+    const val = document.getElementById('l3-happy-input').value.trim().toLowerCase();
+    if (val === 'happy') {
+        showToast("🎉 語音密碼解讀正確！");
+        unlockDigit(2); // 解鎖第 3 位密碼
+        nextLevel();    // 進入下一關
+    } else {
+        showToast("❌ 單詞不正確，請再聽一次！");
+    }
+}
     </script>
 </body>
 </html>
