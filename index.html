@@ -284,22 +284,13 @@
                 </div>
 
                 <!-- STAGE 3 RADIO FREQUENCY -->
-                <!-- 第三關：語音情報攔截 -->
-<div id="level-3-card" class="level-card hidden p-6 bg-slate-900/80 rounded-2xl border border-cyan-500/30">
-    <h3 class="text-lg font-bold text-cyan-400 mb-2">第三關：語音情報攔截</h3>
-    <p class="text-sm text-slate-300 mb-4">請點擊播放按鈕聆聽特務秘密錄音，並輸入聽到的英文單詞：</p>
-    
-    <div class="mb-6 flex flex-col items-center justify-center p-4 bg-slate-800/60 rounded-xl border border-cyan-500/20">
-        <button type="button" onclick="playSpeechHappy()" class="flex items-center gap-2 px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl shadow-lg active:scale-95">
-            🔊 播放情報錄音
-        </button>
-    </div>
-
-    <div class="flex gap-2 max-w-md mx-auto">
-        <input type="text" id="l3-happy-input" placeholder="請輸入聽到的英文單詞..." class="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-cyan-400">
-        <button type="button" onclick="checkHappyWord()" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl active:scale-95">驗證</button>
-    </div>
-</div>
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="font-bold text-cyan-300">5. 第三關（電波攔截）鎖定頻率設定</div>
+                    <div class="flex items-center gap-3">
+                        <label class="text-xs text-slate-400 flex-shrink-0">目標 FM 頻率 (MHz):</label>
+                        <input type="number" step="0.1" min="88.0" max="108.0" id="cfgStage3Target" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-center font-tech font-bold text-cyan-300 outline-none"/>
+                    </div>
+                </div>
 
                 <!-- STAGE 4 MATH PUZZLE -->
                 <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
@@ -962,11 +953,10 @@ document.addEventListener('click', (e) => {
         }
     }
 });
-        // 全域監聽：只要畫面出現或切換到第 3 關，立刻執行改寫
-document.addEventListener('click', () => {
+        // 1. 強制替換第 3 關 HTML
+function setupHappyLevel3() {
     const l3Card = document.getElementById('level-3-card');
-    // 如果第 3 關顯示中，且還沒換成語音介面，就進行替換
-    if (l3Card && !l3Card.classList.contains('hidden') && !document.getElementById('l3-happy-input')) {
+    if (l3Card) {
         l3Card.innerHTML = `
             <h3 class="text-lg font-bold text-cyan-400 mb-2">第三關：語音情報攔截</h3>
             <p class="text-sm text-slate-300 mb-4">請點擊播放按鈕聆聽特務秘密錄音，並輸入聽到的英文單詞：</p>
@@ -981,9 +971,9 @@ document.addEventListener('click', () => {
             </div>
         `;
     }
-});
+}
 
-// 朗讀 Happy 語音
+// 2. 朗讀 Happy 語音
 function playSpeechHappy() {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -996,7 +986,7 @@ function playSpeechHappy() {
     }
 }
 
-// 驗證單詞與通關
+// 3. 驗證單詞與通關
 function checkHappyWord() {
     const inputEl = document.getElementById('l3-happy-input');
     const val = inputEl ? inputEl.value.trim().toLowerCase() : '';
@@ -1004,37 +994,24 @@ function checkHappyWord() {
         if (typeof showToast === 'function') showToast("🎉 語音密碼解讀正確！");
         if (typeof unlockDigit === 'function') unlockDigit(2);
         if (typeof nextLevel === 'function') nextLevel();
+        else if (typeof goToLevel === 'function') goToLevel(4);
     } else {
         if (typeof showToast === 'function') showToast("❌ 單詞不正確，請再聽一次！");
         else alert("❌ 單詞不正確，請再聽一次！");
-    }
-}
-        // 朗讀 Happy 語音
-function playSpeechHappy() {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const msg = new SpeechSynthesisUtterance('Happy');
-        msg.lang = 'en-US';
-        msg.rate = 0.8;
-        window.speechSynthesis.speak(msg);
-    } else {
-        alert("手機瀏覽器不支援語音朗讀");
     }
 }
 
-// 驗證單詞與通關
-function checkHappyWord() {
-    const inputEl = document.getElementById('l3-happy-input');
-    const val = inputEl ? inputEl.value.trim().toLowerCase() : '';
-    if (val === 'happy') {
-        if (typeof showToast === 'function') showToast("🎉 語音密碼解讀正確！");
-        if (typeof unlockDigit === 'function') unlockDigit(2);
-        if (typeof nextLevel === 'function') nextLevel();
-    } else {
-        if (typeof showToast === 'function') showToast("❌ 單詞不正確，請再聽一次！");
-        else alert("❌ 單詞不正確，請再聽一次！");
-    }
+// 4. 攔截原版的 renderLevel，防止第 3 關被蓋回旋鈕
+if (typeof renderLevel === 'function') {
+    const originalRenderLevel = renderLevel;
+    window.renderLevel = function(level) {
+        originalRenderLevel(level);
+        if (level === 3) setupHappyLevel3();
+    };
 }
+
+// 定時確保替換
+setInterval(setupHappyLevel3, 500);
     </script>
 </body>
 </html>
