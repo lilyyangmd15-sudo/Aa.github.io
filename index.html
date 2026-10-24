@@ -953,10 +953,11 @@ document.addEventListener('click', (e) => {
         }
     }
 });
-        // 1. 強制替換第 3 關 HTML
-function setupHappyLevel3() {
+        // 全域監聽：只要畫面出現或切換到第 3 關，立刻執行改寫
+document.addEventListener('click', () => {
     const l3Card = document.getElementById('level-3-card');
-    if (l3Card) {
+    // 如果第 3 關顯示中，且還沒換成語音介面，就進行替換
+    if (l3Card && !l3Card.classList.contains('hidden') && !document.getElementById('l3-happy-input')) {
         l3Card.innerHTML = `
             <h3 class="text-lg font-bold text-cyan-400 mb-2">第三關：語音情報攔截</h3>
             <p class="text-sm text-slate-300 mb-4">請點擊播放按鈕聆聽特務秘密錄音，並輸入聽到的英文單詞：</p>
@@ -971,9 +972,9 @@ function setupHappyLevel3() {
             </div>
         `;
     }
-}
+});
 
-// 2. 朗讀 Happy 語音
+// 朗讀 Happy 語音
 function playSpeechHappy() {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -986,7 +987,7 @@ function playSpeechHappy() {
     }
 }
 
-// 3. 驗證單詞與通關
+// 驗證單詞與通關
 function checkHappyWord() {
     const inputEl = document.getElementById('l3-happy-input');
     const val = inputEl ? inputEl.value.trim().toLowerCase() : '';
@@ -994,24 +995,11 @@ function checkHappyWord() {
         if (typeof showToast === 'function') showToast("🎉 語音密碼解讀正確！");
         if (typeof unlockDigit === 'function') unlockDigit(2);
         if (typeof nextLevel === 'function') nextLevel();
-        else if (typeof goToLevel === 'function') goToLevel(4);
     } else {
         if (typeof showToast === 'function') showToast("❌ 單詞不正確，請再聽一次！");
         else alert("❌ 單詞不正確，請再聽一次！");
     }
 }
-
-// 4. 攔截原版的 renderLevel，防止第 3 關被蓋回旋鈕
-if (typeof renderLevel === 'function') {
-    const originalRenderLevel = renderLevel;
-    window.renderLevel = function(level) {
-        originalRenderLevel(level);
-        if (level === 3) setupHappyLevel3();
-    };
-}
-
-// 定時確保替換
-setInterval(setupHappyLevel3, 500);
     </script>
 </body>
 </html>
