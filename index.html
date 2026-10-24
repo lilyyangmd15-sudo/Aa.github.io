@@ -97,7 +97,7 @@
                     <h1 class="text-lg font-black text-slate-100 tracking-wide">關主黑輪</h1>
                 </div>
                 <!-- Settings Drawer Trigger Gear Button -->
-                <button onclick="openSettingsModal()" class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-400 transition-all shadow-lg active:scale-95" title="任務設定">
+                <button onclick="openSettingsModal()" class="hidden p-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-400 transition-all shadow-lg active:scale-95" title="任務設定">
                     <i class="fa-solid fa-gear text-xl"></i>
                 </button>
             </div>
@@ -943,6 +943,9 @@
             closeSettingsModal();
             loadStage(currentStage);
         }
+        document.getElementById('nav-avatar-container').addEventListener('click', () => {
+    openSettingsModal();
+});
     </script>
 </body>
 </html>
