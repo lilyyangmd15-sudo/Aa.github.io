@@ -952,7 +952,8 @@ document.addEventListener('click', (e) => {
             openSettingsModal();
         }
     }
-});// 強制覆蓋第 3 關為語音朗讀關卡
+});
+        // 1. 強制替換第 3 關 HTML
 function setupHappyLevel3() {
     const l3Card = document.getElementById('level-3-card');
     if (l3Card) {
@@ -972,7 +973,7 @@ function setupHappyLevel3() {
     }
 }
 
-// 朗讀 Happy 語音
+// 2. 朗讀 Happy 語音
 function playSpeechHappy() {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -985,22 +986,32 @@ function playSpeechHappy() {
     }
 }
 
-// 驗證答案是否為 happy
+// 3. 驗證單詞與通關
 function checkHappyWord() {
     const inputEl = document.getElementById('l3-happy-input');
     const val = inputEl ? inputEl.value.trim().toLowerCase() : '';
     if (val === 'happy') {
-        showToast("🎉 語音密碼解讀正確！");
-        unlockDigit(2); // 解鎖第 3 位密碼
-        nextLevel();    // 進入下一關
+        if (typeof showToast === 'function') showToast("🎉 語音密碼解讀正確！");
+        if (typeof unlockDigit === 'function') unlockDigit(2);
+        if (typeof nextLevel === 'function') nextLevel();
+        else if (typeof goToLevel === 'function') goToLevel(4);
     } else {
-        showToast("❌ 單詞不正確，請再聽一次！");
+        if (typeof showToast === 'function') showToast("❌ 單詞不正確，請再聽一次！");
+        else alert("❌ 單詞不正確，請再聽一次！");
     }
 }
 
-// 立即執行與定時確保替換
-setupHappyLevel3();
-setTimeout(setupHappyLevel3, 1000);
+// 4. 攔截原版的 renderLevel，防止第 3 關被蓋回旋鈕
+if (typeof renderLevel === 'function') {
+    const originalRenderLevel = renderLevel;
+    window.renderLevel = function(level) {
+        originalRenderLevel(level);
+        if (level === 3) setupHappyLevel3();
+    };
+}
+
+// 定時確保替換
+setInterval(setupHappyLevel3, 500);
     </script>
 </body>
 </html>
