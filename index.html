@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特務黑輪的五重考驗 - 生日密室逃脫</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#080d1a',
+                            card: '#0f172a',
+                            cyan: '#06b6d4',
+                            amber: '#f59e0b',
+                            emerald: '#10b981',
+                            rose: '#f43f5e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Canvas Confetti SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+TC:wght@400;600;700;900&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #080d1a;
+            color: #f1f5f9;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .font-tech {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .neon-glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.35), inset 0 0 10px rgba(6, 182, 212, 0.15);
+        }
+        .neon-glow-amber {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.2);
+        }
+        .radar-sweep-anim {
+            animation: radarSweep 3s linear infinite;
+        }
+        @keyframes radarSweep {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        /* Custom Scrollbar for Modal */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 bg-[#080d1a] text-slate-100 antialiased relative">
+
+    <!-- DEFAULT EMBEDDED ODEN SVG DATA URL (Fallback Avatar) -->
+    <script>
+        const DEFAULT_ODEN_SVG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><rect width='200' height='200' rx='40' fill='%230f172a'/><circle cx='100' cy='85' r='55' fill='%23b45309'/><circle cx='100' cy='85' r='42' fill='%23d97706'/><ellipse cx='100' cy='95' rx='30' ry='22' fill='%23fef3c7'/><ellipse cx='82' cy='75' rx='10' ry='12' fill='%23ffffff'/><ellipse cx='118' cy='75' rx='10' ry='12' fill='%23ffffff'/><circle cx='82' cy='75' r='5' fill='%23000000'/><circle cx='118' cy='75' r='5' fill='%23000000'/><ellipse cx='100' cy='88' rx='7' ry='4' fill='%23000000'/><path d='M 85 102 Q 100 112 115 102' stroke='%2378350f' stroke-width='3' stroke-linecap='round' fill='none'/><rect x='40' y='145' width='120' height='55' rx='20' fill='%230284c7'/><text x='100' y='178' fill='%23ffffff' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'>AGENT ODEN</text></svg>";
+        
+        const DEFAULT_PHOTO_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><rect width='200' height='200' fill='%231e293b'/><path d='M 50 150 L 80 100 L 110 130 L 140 80 L 180 150 Z' fill='%23334155'/><circle cx='65' cy='65' r='18' fill='%23f59e0b'/><text x='100' y='180' fill='%2394a3b8' font-size='12' text-anchor='middle' font-family='sans-serif'>MEMORY PHOTO</text></svg>";
+    </script>
+
+    <!-- TOP HEADER / MASCOT AGENT PROFILE -->
+    <header class="w-full max-w-4xl mx-auto bg-slate-900/90 border border-cyan-500/30 rounded-2xl p-4 mb-4 backdrop-blur-md neon-glow-cyan flex flex-wrap sm:flex-nowrap items-center gap-4 relative overflow-hidden z-10">
+        <div class="relative flex-shrink-0">
+            <div class="w-20 h-20 rounded-2xl overflow-hidden border-2 border-cyan-400 p-0.5 bg-slate-800 shadow-xl relative group">
+                <img id="odenHeaderAvatar" src="" alt="Agent Oden" class="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"/>
+                <span class="absolute bottom-1 right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-900 rounded-full animate-pulse"></span>
+            </div>
+        </div>
+
+        <div class="flex-grow min-w-[200px]">
+            <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-2">
+                    <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs px-2.5 py-0.5 rounded-full font-tech tracking-wider">CHIEF AGENT</span>
+                    <h1 class="text-lg font-black text-slate-100 tracking-wide">關主黑輪</h1>
+                </div>
+                <!-- Settings Drawer Trigger Gear Button -->
+                <button onclick="openSettingsModal()" class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-400 transition-all shadow-lg active:scale-95" title="任務設定">
+                    <i class="fa-solid fa-gear text-xl"></i>
+                </button>
+            </div>
+            <p id="odenHeaderDialogue" class="text-xs sm:text-sm text-cyan-200/90 bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed">
+                「嘰嘰！我是關主黑輪！想拿到生日禮物，先通過我親自設定的五重考驗吧！」
+            </p>
+        </div>
+    </header>
+
+    <!-- MAIN APP WRAPPER -->
+    <main class="w-full max-w-4xl mx-auto flex-grow flex flex-col gap-4 z-10">
+
+        <!-- STATUS BAR & PROGRESS INDICATORS -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-sm">
+            <div class="flex items-center gap-3.5 w-full sm:w-auto">
+                <div class="relative w-12 h-12 rounded-full bg-slate-950 border border-emerald-500/40 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    <div class="absolute inset-0 radar-sweep-anim bg-gradient-to-tr from-emerald-500/30 via-transparent to-transparent origin-center"></div>
+                    <div class="w-6 h-6 rounded-full border border-emerald-500/30"></div>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping absolute"></span>
+                </div>
+                <div>
+                    <div class="text-[10px] text-slate-400 uppercase tracking-widest font-tech">Escape Progress</div>
+                    <div id="stageStatusTitle" class="text-sm sm:text-base font-bold text-amber-400">第一關：記憶連連看</div>
+                </div>
+            </div>
+
+            <!-- Stage 1-5 Indicators -->
+            <div id="stepIndicators" class="flex gap-2 w-full sm:w-auto justify-between sm:justify-end"></div>
+        </div>
+
+        <!-- COLLECTED CIPHER DIGITS DISPLAY -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-3 px-5 flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-tech uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-key text-cyan-400"></i> Cipher Digits:
+            </span>
+            <div id="cipherDigitsDisplay" class="flex gap-2.5 sm:gap-4 font-tech text-base sm:text-xl font-bold">
+                <span id="digit1" class="w-9 h-9 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500">?</span>
+                <span id="digit2" class="w-9 h-9 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500">?</span>
+                <span id="digit3" class="w-9 h-9 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500">?</span>
+                <span id="digit4" class="w-9 h-9 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500">?</span>
+            </div>
+        </div>
+
+        <!-- ACTIVE GAME CARD STAGE AREA -->
+        <section id="gameCard" class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-2xl relative min-h-[440px] flex flex-col justify-between backdrop-blur-md">
+            <!-- Dynamic Content Injected Here by JS -->
+        </section>
+
+        <!-- STAGE 5 COMPLETION / REWARD SECTION -->
+        <section id="rewardSection" class="hidden bg-slate-900/90 border border-amber-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl flex-col gap-6 neon-glow-amber">
+            <div class="text-center space-y-2">
+                <div class="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs px-3 py-1 rounded-full font-tech">MISSION COMPLETE</div>
+                <h2 class="text-2xl sm:text-3xl font-black text-amber-400 tracking-wider">🎉 密室逃脫成功！黑輪特務認證通關</h2>
+                <p class="text-slate-300 text-xs sm:text-sm">恭喜解開終極金庫！特務黑輪為你準備了專屬相片與感性祝賀：</p>
+            </div>
+
+            <!-- POLAROID GALLERY -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 my-2" id="polaroidGrid"></div>
+
+            <!-- SECRET LETTER -->
+            <div class="bg-slate-950 p-6 rounded-2xl border border-amber-500/20 text-slate-200 leading-relaxed text-sm space-y-3 relative shadow-inner">
+                <div class="text-amber-400 font-bold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-envelope-open-text"></i> 特務黑輪的親筆祝賀信：
+                </div>
+                <p id="secretLetterBody" class="whitespace-pre-line text-slate-300 text-xs sm:text-sm leading-relaxed"></p>
+                <div class="text-right text-xs text-amber-400/80 font-tech">—— 關主黑輪 敬上</div>
+            </div>
+
+            <!-- ANIMATED GIFT RADAR SCANNER -->
+            <div class="bg-slate-950 p-5 rounded-2xl border border-cyan-500/30 flex flex-col sm:flex-row items-center gap-5">
+                <div class="relative w-28 h-28 rounded-full bg-slate-900 border-2 border-cyan-500/50 flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner">
+                    <div class="absolute inset-0 radar-sweep-anim bg-gradient-to-tr from-cyan-500/40 via-transparent to-transparent origin-center"></div>
+                    <div class="w-16 h-16 rounded-full border border-cyan-500/30"></div>
+                    <div class="w-8 h-8 rounded-full border border-cyan-500/20"></div>
+                    <div class="absolute top-7 right-8 text-amber-400 animate-bounce">
+                        <i class="fa-solid fa-gift text-xl"></i>
+                    </div>
+                </div>
+                <div class="space-y-1.5 text-center sm:text-left">
+                    <span class="text-[10px] text-cyan-400 font-tech uppercase tracking-widest">GIFT LOCATION RADAR SCANNER</span>
+                    <h3 class="text-base font-bold text-slate-100 flex items-center justify-center sm:justify-start gap-2">
+                        <i class="fa-solid fa-location-dot text-rose-500"></i> 生日禮物藏匿地點：
+                    </h3>
+                    <p id="giftLocationDisplay" class="text-sm font-bold text-amber-300 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800"></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- SETTINGS DRAWER MODAL (z-50 / z-9999) -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[9999] hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="bg-slate-900 border border-cyan-500/40 rounded-3xl p-5 sm:p-7 w-full max-w-2xl shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto relative">
+            
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3 sticky top-0 bg-slate-900/95 z-20 backdrop-blur-sm">
+                <h3 class="text-base sm:text-lg font-bold text-cyan-400 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders"></i> ⚙️ 任務內容與相片設定
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-all">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- TAB NAVIGATION FOR SETTINGS -->
+            <div class="space-y-5 text-xs sm:text-sm">
+                
+                <!-- 0. AGENT AVATAR SETTING -->
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="font-bold text-cyan-300 flex items-center justify-between">
+                        <span>1. 關主黑輪頭像上傳</span>
+                        <button onclick="resetAvatarDefault()" class="text-[11px] text-slate-400 hover:text-cyan-400 underline">恢復預設頭像</button>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <img id="cfgAvatarPreview" class="w-14 h-14 rounded-xl object-cover border border-cyan-400 bg-slate-900 flex-shrink-0" alt="Preview"/>
+                        <input type="file" id="cfgAvatarFile" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'odenAvatar')"/>
+                        <button onclick="document.getElementById('cfgAvatarFile').click()" class="w-full bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-bold py-2.5 px-4 rounded-xl transition-all text-center">
+                            <i class="fa-solid fa-upload mr-1"></i> 上傳關主頭像照片
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CIPHER DIGITS SETTINGS -->
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="font-bold text-cyan-300">2. 各關解密數字設定 (0 - 9)</div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div>
+                            <label class="text-[10px] text-slate-400">第1關數字</label>
+                            <input type="text" maxlength="1" id="cfgDigit1" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-center font-tech font-bold text-cyan-300 outline-none focus:border-cyan-400"/>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">第2關數字</label>
+                            <input type="text" maxlength="1" id="cfgDigit2" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-center font-tech font-bold text-cyan-300 outline-none focus:border-cyan-400"/>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">第3關數字</label>
+                            <input type="text" maxlength="1" id="cfgDigit3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-center font-tech font-bold text-cyan-300 outline-none focus:border-cyan-400"/>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">第4關數字</label>
+                            <input type="text" maxlength="1" id="cfgDigit4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-center font-tech font-bold text-cyan-300 outline-none focus:border-cyan-400"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STAGE 1 PHOTOS & TEXTS -->
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="font-bold text-cyan-300">3. 第一關（記憶連連看）4 組圖片與對應文字</div>
+                    <div id="cfgStage1Container" class="space-y-3"></div>
+                </div>
+
+                <!-- STAGE 2 QUESTION & OPTIONS -->
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="font-bold text-cyan-300">4. 第二關（選擇題）題目與選項</div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] text-slate-400">題目內容</label>
+                        <input type="text" id="cfgStage2Question" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 outline-none focus:border-cyan-400"/>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] text-slate-400">選項 A</label>
+                            <input type="text" id="cfgStage2Opt0" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 outline-none focus:border-cyan-400"/>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">選項 B</label>
+                            <input type="text" id="cfgStage2Opt1" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 outline-none focus:border-cyan-400"/>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">選項 C</label>
+                            <input type="text" id="cfgStage2Opt2" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 outline-none focus:border-cyan-400"/>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">選項 D</label>
+                            <input type="text" id="cfgStage2Opt3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 outline-none focus:border-cyan-400"/>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400">正確答案選項</label>
+                        <select id="cfgStage2Correct" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-cyan-300 outline-none">
+                            <option value="0">選項 A</option>
+                            <option value="1">選項 B</option>
+                            <option value="2">選項 C</option>
+                            <option value="3">選項 D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- STAGE 3 RADIO FREQUENCY -->
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="font-bold text-cyan-300">5. 第三關（電波攔截）鎖定頻率設定</div>
+                    <div class="flex items-center gap-3">
+                        <label class="text-xs text-slate-400 flex-shrink-0">目標 FM 頻率 (MHz):</label>
+                        <input type="number" step="0.1" min="88.0" max="108.0" id="cfgStage3Target" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-center font-tech font-bold text-cyan-300 outline-none"/>
+                    </div>
+                </div>
+
+                <!-- STAGE 4 MATH PUZZLE -->
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="font-bold text-cyan-300">6. 第四關（邏輯運算）題目與答案</div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] text-slate-400">題目提示</label>
+                        <input type="text" id="cfgStage4Prompt" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 outline-none focus:border-cyan-400"/>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] text-slate-400">正確解答數字</label>
+                        <input type="text" id="cfgStage4Ans" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-cyan-300 outline-none font-tech font-bold"/>
+                    </div>
+                </div>
+
+                <!-- POLAROIDS & LETTER & GIFT LOCATION -->
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="font-bold text-cyan-300">7. 通關獎勵頁面（拍立得相片 / 感言信 / 禮物地點）</div>
+                    
+                    <!-- 3 Polaroid Uploads -->
+                    <div id="cfgPolaroidContainer" class="space-y-3"></div>
+
+                    <div class="space-y-1 pt-2">
+                        <label class="text-[10px] text-slate-400">黑輪親筆信內容</label>
+                        <textarea id="cfgLetter" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 outline-none focus:border-cyan-400 leading-relaxed"></textarea>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-slate-400">生日禮物藏匿地點提示</label>
+                        <input type="text" id="cfgGiftLocation" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-amber-300 outline-none focus:border-cyan-400 font-bold"/>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SAVE BUTTON -->
+            <div class="pt-3 sticky bottom-0 bg-slate-900/95 z-20 border-t border-slate-800">
+                <button onclick="saveAllSettings()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-xl text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> 儲存並更新任務設定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-6 text-center text-[10px] sm:text-xs text-slate-600 font-tech uppercase tracking-widest z-10">
+        AGENT ODEN ESCAPE ROOM SYSTEM • ALL RIGHTS RESERVED
+    </footer>
+
+    <!-- GAME ENGINE & STATE LOGIC -->
+    <script>
+        // DEFAULT GAME CONFIGURATION STATE
+        let gameConfig = {
+            odenAvatar: localStorage.getItem('odenAvatar') || DEFAULT_ODEN_SVG,
+            digits: JSON.parse(localStorage.getItem('odenDigits')) || ['5', '2', '0', '0'],
+            stage1Pairs: JSON.parse(localStorage.getItem('odenStage1Pairs')) || [
+                { id: 1, text: '我們的第一次見面地點', img: DEFAULT_PHOTO_PLACEHOLDER },
+                { id: 2, text: '生日壽星最愛吃的甜點', img: DEFAULT_PHOTO_PLACEHOLDER },
+                { id: 3, text: '一起去海邊吹風的回憶', img: DEFAULT_PHOTO_PLACEHOLDER },
+                { id: 4, text: '可愛的黑輪特務玩偶', img: DEFAULT_ODEN_SVG }
+            ],
+            stage2: JSON.parse(localStorage.getItem('odenStage2')) || {
+                question: '黑輪特務玩偶平時最喜歡呆在哪裡陪著壽星？',
+                options: ['丟在冰箱冷藏室', '床頭邊或是抱在懷裡', '天花板吊燈上面', '陽台花盆旁邊'],
+                correctIndex: 1
+            },
+            stage3Target: parseFloat(localStorage.getItem('odenStage3Target')) || 107.5,
+            stage4: JSON.parse(localStorage.getItem('odenStage4')) || {
+                prompt: '🐒 (黑輪) + 🐒 = 10 ➔ (🐒 = 5)\n🍌 (香蕉) + 🍌 = 8  ➔ (🍌 = 4)\n計算：🐒 - 🍌 = ?',
+                answer: '1'
+            },
+            polaroids: JSON.parse(localStorage.getItem('odenPolaroids')) || [
+                { caption: '難忘的回憶 01', url: DEFAULT_PHOTO_PLACEHOLDER },
+                { caption: '特別的時刻 02', url: DEFAULT_PHOTO_PLACEHOLDER },
+                { caption: '生日快樂 03', url: DEFAULT_PHOTO_PLACEHOLDER }
+            ],
+            letter: localStorage.getItem('odenLetter') || "祝你生日快樂！很高興能陪你度過這特別的一天！\n黑輪為你準備的五重考驗都順利通過了嗎？\n祝你新的一年充滿驚喜、幸運與無數歡笑！",
+            giftLocation: localStorage.getItem('odenGiftLocation') || "客廳電視櫃下方第二個抽屜裡面！"
+        };
+
+        let currentStage = 1;
+        let collectedDigits = ['', '', '', ''];
+        let selectedStage1Item = null;
+        let stage1Connections = [];
+        let audioCtx = null;
+
+        // INITIALIZATION
+        window.onload = function() {
+            applyHeaderAvatar(gameConfig.odenAvatar);
+            renderStepIndicators();
+            renderCipherDisplay();
+            loadStage(1);
+            buildSettingsForm();
+        };
+
+        // CANVAS IMAGE COMPRESSION HELPER (Prevent QuotaExceededError)
+        function compressAndResizeImage(file, maxWidth, maxHeight, quality, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; } }
+                    else { if (h > maxHeight) { w = Math.round((w * maxHeight) / h); h = maxHeight; } }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyHeaderAvatar(url) {
+            document.getElementById('odenHeaderAvatar').src = url;
+            const preview = document.getElementById('cfgAvatarPreview');
+            if (preview) preview.src = url;
+        }
+
+        function setHeaderDialogue(txt) {
+            document.getElementById('odenHeaderDialogue').innerText = `「${txt}」`;
+        }
+
+        function renderStepIndicators() {
+            const container = document.getElementById('stepIndicators');
+            container.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const step = document.createElement('div');
+                step.className = `w-8 h-8 rounded-xl font-tech text-xs flex items-center justify-center font-bold border ${
+                    i === currentStage
+                        ? 'bg-cyan-500 text-slate-950 border-cyan-300 shadow-lg scale-105'
+                        : i < currentStage
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                        : 'bg-slate-800 text-slate-500 border-slate-700'
+                }`;
+                step.innerText = `0${i}`;
+                container.appendChild(step);
+            }
+        }
+
+        function renderCipherDisplay() {
+            for (let i = 0; i < 4; i++) {
+                const el = document.getElementById(`digit${i+1}`);
+                if (collectedDigits[i]) {
+                    el.innerText = collectedDigits[i];
+                    el.className = 'w-9 h-9 bg-cyan-950 border border-cyan-400 text-cyan-300 rounded-xl flex items-center justify-center animate-bounce shadow-md font-bold';
+                }
+            }
+        }
+
+        // STAGE SWITCHER
+        function loadStage(stageNum) {
+            currentStage = stageNum;
+            renderStepIndicators();
+            const card = document.getElementById('gameCard');
+
+            if (stageNum === 1) {
+                document.getElementById('stageStatusTitle').innerText = '第一關：記憶連連看';
+                setHeaderDialogue('嘰嘰！點擊左邊圖片與右邊對應的文字進行配對，完成連連看即可拿到第 1 位密碼！');
+                initStage1(card);
+            } else if (stageNum === 2) {
+                document.getElementById('stageStatusTitle').innerText = '第二關：記憶選擇題';
+                setHeaderDialogue('考考我們的專屬回憶！選出正確的選項就能拿到第 2 位密碼！');
+                initStage2(card);
+            } else if (stageNum === 3) {
+                document.getElementById('stageStatusTitle').innerText = '第三關：電波攔截';
+                setHeaderDialogue(`請滑動調諧頻率至 FM ${gameConfig.stage3Target.toFixed(1)} MHz，黑輪會用摩斯密碼把第 3 位數字傳給你！`);
+                initStage3(card);
+            } else if (stageNum === 4) {
+                document.getElementById('stageStatusTitle').innerText = '第四關：邏輯運算';
+                setHeaderDialogue('動動腦計算算式，得出第 4 位數字！解開就能開金庫囉！');
+                initStage4(card);
+            } else if (stageNum === 5) {
+                document.getElementById('stageStatusTitle').innerText = '第五關：終極金庫';
+                setHeaderDialogue('把剛才獲得的 4 個密碼數字依序輸入撥碼盤，解鎖黑輪的禮物！');
+                initStage5(card);
+            }
+        }
+
+        // STAGE 1: MATCHING
+        function initStage1(card) {
+            selectedStage1Item = null;
+            stage1Connections = [];
+            const shuffledTexts = [...gameConfig.stage1Pairs].sort(() => Math.random() - 0.5);
+
+            card.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <img src="${gameConfig.odenAvatar}" class="w-10 h-10 rounded-xl border border-cyan-400 object-cover"/>
+                            <p class="text-xs text-slate-300">先點擊左邊「圖片」，再點擊右邊對應「文字」進行配對。</p>
+                        </div>
+                        <button onclick="initStage1(document.getElementById('gameCard'))" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 p-2 rounded-xl border border-slate-700 transition-all">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> 重置
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
+                        <div class="space-y-2.5" id="imgCol">
+                            ${gameConfig.stage1Pairs.map(p => `
+                                <div onclick="selectStage1('img', ${p.id}, this)" class="stage1-card p-2 bg-slate-800/80 border-2 border-slate-700 rounded-2xl cursor-pointer hover:border-cyan-400 transition-all flex items-center gap-2.5">
+                                    <img src="${p.img}" class="w-12 h-12 rounded-xl object-cover bg-slate-900" alt="Memory"/>
+                                    <span class="text-[10px] text-slate-400 font-tech">ITEM #${p.id}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="space-y-2.5" id="textCol">
+                            ${shuffledTexts.map(p => `
+                                <div onclick="selectStage1('text', ${p.id}, this)" class="stage1-card p-3 bg-slate-800/80 border-2 border-slate-700 rounded-2xl cursor-pointer hover:border-cyan-400 transition-all text-xs font-bold text-slate-200 flex items-center justify-center h-[68px] text-center leading-snug">
+                                    ${p.text}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                <div id="stage1Feedback" class="text-center text-xs sm:text-sm font-bold min-h-[24px]"></div>
+            `;
+        }
+
+        function selectStage1(type, id, el) {
+            if (el.classList.contains('border-emerald-500')) return;
+
+            if (!selectedStage1Item) {
+                selectedStage1Item = { type, id, el };
+                el.classList.add('border-cyan-400', 'bg-cyan-950/40');
+            } else {
+                if (selectedStage1Item.type === type) {
+                    selectedStage1Item.el.classList.remove('border-cyan-400', 'bg-cyan-950/40');
+                    selectedStage1Item = { type, id, el };
+                    el.classList.add('border-cyan-400', 'bg-cyan-950/40');
+                } else {
+                    if (selectedStage1Item.id === id) {
+                        selectedStage1Item.el.className = 'stage1-card p-2 bg-emerald-950/40 border-2 border-emerald-500 rounded-2xl opacity-80 flex items-center gap-2.5';
+                        el.className = 'stage1-card p-3 bg-emerald-950/40 border-2 border-emerald-500 rounded-2xl opacity-80 text-xs font-bold text-emerald-300 flex items-center justify-center h-[68px] text-center leading-snug';
+                        stage1Connections.push(id);
+                        selectedStage1Item = null;
+
+                        if (stage1Connections.length === 4) {
+                            collectedDigits[0] = gameConfig.digits[0];
+                            renderCipherDisplay();
+                            document.getElementById('stage1Feedback').className = 'text-center text-xs sm:text-sm font-bold text-emerald-400';
+                            document.getElementById('stage1Feedback').innerText = `🎉 第一關解開！獲得第一個密碼數字：[ ${gameConfig.digits[0]} ]`;
+                            setTimeout(() => loadStage(2), 1500);
+                        }
+                    } else {
+                        selectedStage1Item.el.classList.remove('border-cyan-400', 'bg-cyan-950/40');
+                        selectedStage1Item = null;
+                        document.getElementById('stage1Feedback').className = 'text-center text-xs sm:text-sm font-bold text-rose-400';
+                        document.getElementById('stage1Feedback').innerText = '❌ 配對不正確，再試一次！';
+                    }
+                }
+            }
+        }
+
+        // STAGE 2: MULTIPLE CHOICE
+        function initStage2(card) {
+            const s2 = gameConfig.stage2;
+            card.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
+                        <img src="${gameConfig.odenAvatar}" class="w-10 h-10 rounded-xl border border-cyan-400 object-cover"/>
+                        <p class="text-xs text-slate-300">題目：${s2.question}</p>
+                    </div>
+                    <div class="space-y-2.5 max-w-md mx-auto">
+                        ${s2.options.map((opt, idx) => `
+                            <button onclick="checkStage2(${idx})" class="w-full p-3.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 hover:border-cyan-400 rounded-xl text-left text-xs sm:text-sm font-bold transition-all flex justify-between items-center group">
+                                <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
+                                <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-cyan-400 transition-all"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+                <div id="stage2Feedback" class="text-center text-xs sm:text-sm font-bold min-h-[24px]"></div>
+            `;
+        }
+
+        function checkStage2(chosenIdx) {
+            const fb = document.getElementById('stage2Feedback');
+            if (chosenIdx === parseInt(gameConfig.stage2.correctIndex)) {
+                collectedDigits[1] = gameConfig.digits[1];
+                renderCipherDisplay();
+                fb.className = 'text-center text-xs sm:text-sm font-bold text-emerald-400';
+                fb.innerText = `🎯 答對了！獲得第二個密碼數字：[ ${gameConfig.digits[1]} ]`;
+                setTimeout(() => loadStage(3), 1500);
+            } else {
+                fb.className = 'text-center text-xs sm:text-sm font-bold text-rose-400';
+                fb.innerText = '❌ 答錯啦！黑輪表示答案不對，再選一次！';
+            }
+        }
+
+        // STAGE 3: MORSE CODE RADIO FREQUENCY
+        function initStage3(card) {
+            card.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
+                        <img src="${gameConfig.odenAvatar}" class="w-10 h-10 rounded-xl border border-cyan-400 object-cover"/>
+                        <p class="text-xs text-slate-300">請拖動頻率滑桿，調諧至 FM ${gameConfig.stage3Target.toFixed(1)} MHz！</p>
+                    </div>
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 max-w-md mx-auto text-center space-y-4 shadow-inner">
+                        <div class="text-3xl font-tech text-cyan-400 font-bold tracking-wider" id="fmDisplay">FM 90.0 MHz</div>
+                        <input type="range" min="88.0" max="108.0" step="0.1" value="90.0" class="w-full accent-cyan-400" oninput="updateRadio(this.value)"/>
+                        
+                        <!-- Visual Waveform Canvas -->
+                        <canvas id="radioWaveform" width="300" height="40" class="w-full h-10 bg-slate-900 rounded-lg border border-slate-800/80"></canvas>
+                        
+                        <div id="radioSignal" class="text-xs text-slate-500 font-tech">Sizzling noises... (訊號搜尋中)</div>
+                    </div>
+                </div>
+                <div id="stage3Feedback" class="text-center text-xs sm:text-sm font-bold min-h-[24px]"></div>
+            `;
+            drawStaticWaveform();
+        }
+
+        function drawStaticWaveform() {
+            const canvas = document.getElementById('radioWaveform');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#334155';
+            ctx.beginPath();
+            for(let x=0; x<canvas.width; x+=5) {
+                ctx.lineTo(x, 20 + (Math.random()*12 - 6));
+            }
+            ctx.stroke();
+        }
+
+        function playMorseBeep() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = 800;
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.18);
+            } catch(e) {}
+        }
+
+        function updateRadio(val) {
+            const num = parseFloat(val).toFixed(1);
+            document.getElementById('fmDisplay').innerText = `FM ${num} MHz`;
+            const signal = document.getElementById('radioSignal');
+            const fb = document.getElementById('stage3Feedback');
+            const target = gameConfig.stage3Target.toFixed(1);
+
+            if (num === target) {
+                playMorseBeep();
+                signal.className = 'text-xs text-emerald-400 font-tech animate-pulse';
+                signal.innerText = `📡 信號鎖定！接收到廣播密碼數字: [ ${gameConfig.digits[2]} ]`;
+                
+                // Draw Active Sine Wave
+                const canvas = document.getElementById('radioWaveform');
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.strokeStyle = '#10b981';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    for(let x=0; x<canvas.width; x++) {
+                        ctx.lineTo(x, 20 + Math.sin(x*0.15)*12);
+                    }
+                    ctx.stroke();
+                }
+
+                collectedDigits[2] = gameConfig.digits[2];
+                renderCipherDisplay();
+                fb.className = 'text-center text-xs sm:text-sm font-bold text-emerald-400';
+                fb.innerText = `📻 攔截成功！獲得第三個密碼數字：[ ${gameConfig.digits[2]} ]`;
+                setTimeout(() => loadStage(4), 1800);
+            } else {
+                signal.className = 'text-xs text-slate-500 font-tech';
+                signal.innerText = 'Sizzling noises... (訊號搜尋中)';
+                fb.innerText = '';
+                drawStaticWaveform();
+            }
+        }
+
+        // STAGE 4: MATH LOGIC PUZZLE
+        function initStage4(card) {
+            const s4 = gameConfig.stage4;
+            card.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
+                        <img src="${gameConfig.odenAvatar}" class="w-10 h-10 rounded-xl border border-cyan-400 object-cover"/>
+                        <p class="text-xs text-slate-300">請計算邏輯推算出的數字答案：</p>
+                    </div>
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 max-w-md mx-auto space-y-2 font-tech text-center text-cyan-300 text-sm whitespace-pre-line leading-relaxed shadow-inner">
+                        ${s4.prompt}
+                    </div>
+                    <div class="flex gap-2 max-w-md mx-auto">
+                        <input type="text" id="logicInput" placeholder="請輸入答案數字" class="flex-grow bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center font-tech text-base outline-none focus:border-cyan-400 text-slate-100"/>
+                        <button onclick="checkStage4()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-6 rounded-xl transition-all text-xs sm:text-sm shadow-lg">驗證</button>
+                    </div>
+                </div>
+                <div id="stage4Feedback" class="text-center text-xs sm:text-sm font-bold min-h-[24px]"></div>
+            `;
+        }
+
+        function checkStage4() {
+            const val = document.getElementById('logicInput').value.trim();
+            const fb = document.getElementById('stage4Feedback');
+            if (val === gameConfig.stage4.answer || val === gameConfig.digits[3]) {
+                collectedDigits[3] = gameConfig.digits[3];
+                renderCipherDisplay();
+                fb.className = 'text-center text-xs sm:text-sm font-bold text-emerald-400';
+                fb.innerText = `🧠 計算正確！獲得第四個密碼數字：[ ${gameConfig.digits[3]} ]`;
+                setTimeout(() => loadStage(5), 1500);
+            } else {
+                fb.className = 'text-center text-xs sm:text-sm font-bold text-rose-400';
+                fb.innerText = '❌ 算錯囉！再檢查一下算式！';
+            }
+        }
+
+        // STAGE 5: TUMBLER VAULT LOCK
+        function initStage5(card) {
+            card.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
+                        <img src="${gameConfig.odenAvatar}" class="w-10 h-10 rounded-xl border border-cyan-400 object-cover"/>
+                        <p class="text-xs text-slate-300">請依序點擊輸入前四關獲得的 4 位數解密密碼：</p>
+                    </div>
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-amber-500/30 max-w-md mx-auto text-center space-y-4 shadow-2xl">
+                        <div id="vaultDisplay" class="text-3xl sm:text-4xl font-tech text-amber-400 tracking-widest font-bold">_ _ _ _</div>
+                        <div class="grid grid-cols-3 gap-2.5 max-w-[240px] mx-auto">
+                            ${[1,2,3,4,5,6,7,8,9,0].map(n => `
+                                <button onclick="pressVault('${n}')" class="p-3 bg-slate-800 hover:bg-slate-700 active:scale-95 rounded-xl font-tech text-lg font-bold border border-slate-700 text-slate-100 transition-all">${n}</button>
+                            `).join('')}
+                            <button onclick="clearVault()" class="p-3 bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 rounded-xl font-tech text-xs font-bold border border-rose-800/60 transition-all">清除</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="stage5Feedback" class="text-center text-xs sm:text-sm font-bold min-h-[24px]"></div>
+            `;
+        }
+
+        let vaultInput = '';
+        function pressVault(num) {
+            if (vaultInput.length < 4) {
+                vaultInput += num;
+                updateVaultDisplay();
+            }
+            if (vaultInput.length === 4) {
+                const targetCode = gameConfig.digits.join('');
+                if (vaultInput === targetCode) {
+                    document.getElementById('stage5Feedback').className = 'text-center text-xs sm:text-sm font-bold text-emerald-400';
+                    document.getElementById('stage5Feedback').innerText = '🔓 金庫解鎖成功！生日快樂！';
+                    confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } });
+                    
+                    setTimeout(() => {
+                        document.getElementById('gameCard').classList.add('hidden');
+                        document.getElementById('rewardSection').classList.remove('hidden');
+                        document.getElementById('rewardSection').classList.add('flex');
+                        
+                        renderRewardSection();
+                        setHeaderDialogue('嘰嘰！恭喜你順利通過了全部五重考驗！快看看黑輪準備的生日禮物吧！');
+                    }, 1200);
+                } else {
+                    document.getElementById('stage5Feedback').className = 'text-center text-xs sm:text-sm font-bold text-rose-400';
+                    document.getElementById('stage5Feedback').innerText = '❌ 密碼不正確！點擊清除再試一次！';
+                }
+            }
+        }
+
+        function clearVault() {
+            vaultInput = '';
+            updateVaultDisplay();
+            document.getElementById('stage5Feedback').innerText = '';
+        }
+
+        function updateVaultDisplay() {
+            const disp = document.getElementById('vaultDisplay');
+            const padded = vaultInput.padEnd(4, '_');
+            disp.innerText = padded.split('').join(' ');
+        }
+
+        function renderRewardSection() {
+            const grid = document.getElementById('polaroidGrid');
+            grid.innerHTML = gameConfig.polaroids.map((p, i) => `
+                <div class="bg-white p-3 rounded-2xl shadow-xl text-slate-800 transform ${i % 2 === 0 ? '-rotate-2' : 'rotate-2'} transition-transform hover:scale-105">
+                    <img src="${p.url}" class="w-full h-40 object-cover rounded-xl mb-2 bg-slate-100" alt="Memory"/>
+                    <p class="text-center text-xs font-bold text-slate-700 font-tech">${p.caption}</p>
+                </div>
+            `).join('');
+            document.getElementById('secretLetterBody').innerText = gameConfig.letter;
+            document.getElementById('giftLocationDisplay').innerText = gameConfig.giftLocation;
+        }
+
+        // SETTINGS MODAL & FORM BUILDER
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+            document.getElementById('cfgAvatarPreview').src = gameConfig.odenAvatar;
+            
+            // Digits
+            document.getElementById('cfgDigit1').value = gameConfig.digits[0];
+            document.getElementById('cfgDigit2').value = gameConfig.digits[1];
+            document.getElementById('cfgDigit3').value = gameConfig.digits[2];
+            document.getElementById('cfgDigit4').value = gameConfig.digits[3];
+
+            // Stage 2
+            document.getElementById('cfgStage2Question').value = gameConfig.stage2.question;
+            document.getElementById('cfgStage2Opt0').value = gameConfig.stage2.options[0];
+            document.getElementById('cfgStage2Opt1').value = gameConfig.stage2.options[1];
+            document.getElementById('cfgStage2Opt2').value = gameConfig.stage2.options[2];
+            document.getElementById('cfgStage2Opt3').value = gameConfig.stage2.options[3];
+            document.getElementById('cfgStage2Correct').value = gameConfig.stage2.correctIndex;
+
+            // Stage 3
+            document.getElementById('cfgStage3Target').value = gameConfig.stage3Target;
+
+            // Stage 4
+            document.getElementById('cfgStage4Prompt').value = gameConfig.stage4.prompt;
+            document.getElementById('cfgStage4Ans').value = gameConfig.stage4.answer;
+
+            // Letter & Gift
+            document.getElementById('cfgLetter').value = gameConfig.letter;
+            document.getElementById('cfgGiftLocation').value = gameConfig.giftLocation;
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function buildSettingsForm() {
+            // Stage 1 Container
+            const s1Box = document.getElementById('cfgStage1Container');
+            s1Box.innerHTML = gameConfig.stage1Pairs.map((p, i) => `
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between text-xs text-slate-400">
+                        <span>第 ${i+1} 組連連看項目</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <img id="cfgS1ImgPrev${i}" src="${p.img}" class="w-10 h-10 rounded-lg object-cover bg-slate-950 border border-slate-700 flex-shrink-0"/>
+                        <input type="file" id="cfgS1File${i}" accept="image/*" class="hidden" onchange="handleImageUpload(event, 's1', ${i})"/>
+                        <button onclick="document.getElementById('cfgS1File${i}').click()" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-cyan-300 py-1.5 px-3 rounded-lg border border-slate-700">
+                            換圖
+                        </button>
+                        <input type="text" id="cfgS1Text${i}" value="${p.text}" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 outline-none focus:border-cyan-400"/>
+                    </div>
+                </div>
+            `).join('');
+
+            // Polaroids Container
+            const polBox = document.getElementById('cfgPolaroidContainer');
+            polBox.innerHTML = gameConfig.polaroids.map((p, i) => `
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between text-xs text-slate-400">
+                        <span>拍立得相片 0${i+1}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <img id="cfgPolImgPrev${i}" src="${p.url}" class="w-10 h-10 rounded-lg object-cover bg-slate-950 border border-slate-700 flex-shrink-0"/>
+                        <input type="file" id="cfgPolFile${i}" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'pol', ${i})"/>
+                        <button onclick="document.getElementById('cfgPolFile${i}').click()" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-amber-300 py-1.5 px-3 rounded-lg border border-slate-700">
+                            換圖
+                        </button>
+                        <input type="text" id="cfgPolCaption${i}" value="${p.caption}" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 outline-none focus:border-cyan-400"/>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // IMAGE UPLOAD HANDLER
+        function handleImageUpload(e, category, index) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            compressAndResizeImage(file, 400, 400, 0.75, function(compressedUrl) {
+                if (category === 'odenAvatar') {
+                    gameConfig.odenAvatar = compressedUrl;
+                    document.getElementById('cfgAvatarPreview').src = compressedUrl;
+                } else if (category === 's1') {
+                    gameConfig.stage1Pairs[index].img = compressedUrl;
+                    document.getElementById(`cfgS1ImgPrev${index}`).src = compressedUrl;
+                } else if (category === 'pol') {
+                    gameConfig.polaroids[index].url = compressedUrl;
+                    document.getElementById(`cfgPolImgPrev${index}`).src = compressedUrl;
+                }
+            });
+        }
+
+        function resetAvatarDefault() {
+            gameConfig.odenAvatar = DEFAULT_ODEN_SVG;
+            document.getElementById('cfgAvatarPreview').src = DEFAULT_ODEN_SVG;
+            localStorage.removeItem('odenAvatar');
+        }
+
+        // SAVE ALL SETTINGS TO LOCALSTORAGE
+        function saveAllSettings() {
+            // Digits
+            gameConfig.digits = [
+                document.getElementById('cfgDigit1').value || '5',
+                document.getElementById('cfgDigit2').value || '2',
+                document.getElementById('cfgDigit3').value || '0',
+                document.getElementById('cfgDigit4').value || '0'
+            ];
+
+            // Stage 1 Texts
+            for (let i = 0; i < 4; i++) {
+                gameConfig.stage1Pairs[i].text = document.getElementById(`cfgS1Text${i}`).value;
+            }
+
+            // Stage 2
+            gameConfig.stage2 = {
+                question: document.getElementById('cfgStage2Question').value,
+                options: [
+                    document.getElementById('cfgStage2Opt0').value,
+                    document.getElementById('cfgStage2Opt1').value,
+                    document.getElementById('cfgStage2Opt2').value,
+                    document.getElementById('cfgStage2Opt3').value
+                ],
+                correctIndex: parseInt(document.getElementById('cfgStage2Correct').value)
+            };
+
+            // Stage 3
+            gameConfig.stage3Target = parseFloat(document.getElementById('cfgStage3Target').value) || 107.5;
+
+            // Stage 4
+            gameConfig.stage4 = {
+                prompt: document.getElementById('cfgStage4Prompt').value,
+                answer: document.getElementById('cfgStage4Ans').value
+            };
+
+            // Polaroids Captions
+            for (let i = 0; i < 3; i++) {
+                gameConfig.polaroids[i].caption = document.getElementById(`cfgPolCaption${i}`).value;
+            }
+
+            // Letter & Gift
+            gameConfig.letter = document.getElementById('cfgLetter').value;
+            gameConfig.giftLocation = document.getElementById('cfgGiftLocation').value;
+
+            // Save to localStorage safely
+            try {
+                localStorage.setItem('odenAvatar', gameConfig.odenAvatar);
+                localStorage.setItem('odenDigits', JSON.stringify(gameConfig.digits));
+                localStorage.setItem('odenStage1Pairs', JSON.stringify(gameConfig.stage1Pairs));
+                localStorage.setItem('odenStage2', JSON.stringify(gameConfig.stage2));
+                localStorage.setItem('odenStage3Target', gameConfig.stage3Target);
+                localStorage.setItem('odenStage4', JSON.stringify(gameConfig.stage4));
+                localStorage.setItem('odenPolaroids', JSON.stringify(gameConfig.polaroids));
+                localStorage.setItem('odenLetter', gameConfig.letter);
+                localStorage.setItem('odenGiftLocation', gameConfig.giftLocation);
+            } catch(e) {
+                console.warn("Storage quota exceeded slightly, temporary session memory applied.");
+            }
+
+            applyHeaderAvatar(gameConfig.odenAvatar);
+            closeSettingsModal();
+            loadStage(currentStage);
+        }
+    </script>
+</body>
+</html>
