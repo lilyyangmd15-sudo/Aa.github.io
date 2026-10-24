@@ -943,8 +943,15 @@
             closeSettingsModal();
             loadStage(currentStage);
         }
-        document.getElementById('nav-avatar-container').addEventListener('click', () => {
-    openSettingsModal();
+        // 綁定整個左上角黑輪頭像區域（包含圖片與文字）
+document.addEventListener('click', (e) => {
+    // 只要點擊到 header 裡面的頭像、圖片或關主文字，就開啟設定
+    if (e.target.closest('#nav-avatar-container') || e.target.closest('header img') || e.target.closest('header')) {
+        // 如果點擊的是齒輪以外的 header 區域
+        if (!e.target.closest('button')) {
+            openSettingsModal();
+        }
+    }
 });
     </script>
 </body>
